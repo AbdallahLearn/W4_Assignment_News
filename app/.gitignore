@@ -1,0 +1,65 @@
+# Gradle build files
+.gradle/
+build/
+
+# Local configuration files
+local.properties
+.idea/
+*.iml
+
+# Kotlin-specific files
+*.kotlin_module
+
+# Android Studio/IntelliJ files
+/.idea/
+/out/
+/captures/
+/.externalNativeBuild/
+
+# Log files
+*.log
+
+# Dependency directories
+/.gradle/
+/build/
+
+# Generated files
+gen/
+/bin/
+/obj/
+/target/
+
+# MacOS and Linux system files
+.DS_Store
+*.swp
+*.swo
+
+# Keystore files (if any)
+*.keystore
+*.jks
+
+# Environment variables
+.env
+
+# Jetpack Compose Preview cache
+/.previews/
+
+# Ignore APKs and AABs
+*.apk
+*.aab
+
+# Ignore test coverage reports
+/coverage/
+
+# Ignore temporary files
+*.tmp
+*.lock
+*.bak
+
+# Ignore crash reports
+crashlytics/
+
+# Firebase and Google Services
+/google-services.json
+/firebase/
+

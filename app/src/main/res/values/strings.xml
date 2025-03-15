@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">W4_Assignment_News</string>
+    <string name="title_activity_news_detail">NewsDetailActivity</string>
+</resources>
