@@ -1,11 +1,13 @@
 package com.example.w4_assignment_news
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,67 +15,112 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import java.util.Locale
 import kotlin.random.Random
+
+
+// Define Dark Color Scheme
+val DarkColorScheme = darkColorScheme(
+    primary = Color(0xFFBB86FC),
+    secondary = Color(0xFF03DAC6),
+    background = Color(0xFF121212),
+    surface = Color(0xFF1E1E1E),
+    onPrimary = Color.Black,
+    onSecondary = Color.Black,
+    onBackground = Color.White,
+    onSurface = Color.White,
+)
+
+// Define Light Color Scheme
+val LightColorScheme = lightColorScheme(
+    primary = Color(0xFF6200EE),
+    secondary = Color(0xFF03DAC6),
+    background = Color.White,
+    surface = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
+)
+
+// Define Custom Typography
+val AppTypography = Typography(
+    headlineMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Bold,
+        fontSize = 22.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp
+    )
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NewsApp()
+            val currentLanguage = remember { mutableStateOf("en") } // Default to English
+
+            MaterialTheme(
+                colorScheme = if (isSystemInDarkTheme()) DarkColorScheme else LightColorScheme,
+                typography = AppTypography
+            ) {
+                NewsApp(currentLanguage)
+            }
         }
     }
 }
 
 
 
-
 @Composable
-fun NewsHeader(){
+fun NewsHeader(currentLanguage: MutableState<String>) {
     Row(
         modifier = Modifier.fillMaxWidth()
-            .background(Color.LightGray , RoundedCornerShape(50.dp))
+            .background(Color.LightGray, RoundedCornerShape(50.dp))
             .padding(10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
-    ){
+    ) {
         Icon(
             imageVector = Icons.Default.Menu,
             contentDescription = "Menu",
             modifier = Modifier.size(32.dp)
         )
         Text(
-            text="News App",
+            text = stringResource(R.string.app_name), // Use localized string
             fontSize = 22.sp,
             style = MaterialTheme.typography.headlineMedium
         )
-
         Icon(
             imageVector = Icons.Default.Search,
             contentDescription = "Search",
@@ -142,40 +189,42 @@ fun NavbarBottom(){
     }
 
 }
-
 @Composable
-fun MainNewsCard(){
+fun MainNewsCard() {
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(300.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White) // Set background to white
-
-    ){
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface // Use surface color from the theme
+        )
+    ) {
         Column(
             modifier = Modifier.padding(0.dp),
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             AsyncImage(
                 model = "https://www.aljazeera.com/wp-content/uploads/2023/06/This-week-in-the-middle-east42_outisde-image-1500-x1000-1686838868.jpg?resize=770%2C513&quality=80",
                 contentDescription = "News Image",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(220.dp),
-
-
-                )
+                contentScale = ContentScale.Crop
+            )
             Spacer(modifier = Modifier.height(8.dp))
 
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .padding(10.dp)
             ) {
-                Text(text = "Breaking News: Major Event Happening Now!", fontSize = 18.sp,)
-
+                Text(
+                    text = "Breaking News: Major Event Happening Now!",
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface // Use onSurface color for text
+                )
             }
-
         }
-
     }
 }
 
@@ -183,11 +232,10 @@ fun MainNewsCard(){
 
 
 
-
 @Composable
-fun NewsApp() {
+fun NewsApp(currentLanguage: MutableState<String>) {
 
-
+    val isDarkTheme = remember { mutableStateOf(false) }
 
     val newsItems = listOf(
         NewsItem(
@@ -331,99 +379,134 @@ fun NewsApp() {
     )
 
 
-    val context = LocalContext.current  // Get context for Intent
+    // Get context for Intent
+    val context = LocalContext.current
 
-    Scaffold(
-        bottomBar = { NavbarBottom() } // Fixed bottom navigation bar
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues) // Respect system padding
-        ) {
-            NewsHeader()
-
-            LazyColumn(
+    // Apply MaterialTheme with custom color scheme and typography
+    MaterialTheme(
+        colorScheme = if (isDarkTheme.value) DarkColorScheme else LightColorScheme,
+        typography = AppTypography
+    ) {
+        Scaffold(
+            topBar = {
+                Column {
+                    // Add the theme toggle switch in the header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(R.string.app_name), // Use localized string
+                            style = MaterialTheme.typography.headlineMedium
+                        )
+                        Switch(
+                            checked = isDarkTheme.value,
+                            onCheckedChange = { isDarkTheme.value = it },
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                    NewsHeader(currentLanguage) // Pass currentLanguage to NewsHeader
+                }
+            },
+            bottomBar = { NavbarBottom() } // Fixed bottom navigation bar
+        ) { paddingValues ->
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(paddingValues) // Respect system padding
             ) {
-                item { MainNewsCard() }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
-                items(newsItems) { news ->
-                    NewsRow(news) { selectedNews ->
-                        val intent = Intent(context, DetailsActivity::class.java).apply {
-                            putExtra("title", selectedNews.title)
-                            putExtra("date", selectedNews.date)
-                            putExtra("like_count", selectedNews.like)
-                            putExtra("description", selectedNews.fullDescription)
-                            putExtra("imageUrl", selectedNews.imageUrl)
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    item { MainNewsCard() }
+                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                    items(newsItems) { news ->
+                        NewsRow(news) { selectedNews ->
+                            val intent = Intent(context, DetailsActivity::class.java).apply {
+                                putExtra("title", selectedNews.title)
+                                putExtra("date", selectedNews.date)
+                                putExtra("like_count", selectedNews.like)
+                                putExtra("description", selectedNews.fullDescription)
+                                putExtra("imageUrl", selectedNews.imageUrl)
+                                putExtra("isDarkTheme", isDarkTheme.value) // Pass the theme state
+                            }
+                            context.startActivity(intent)
                         }
-                        context.startActivity(intent)
                     }
                 }
             }
         }
     }
 }
-
-
 @Composable
 fun NewsRow(news: NewsItem, onClick: (NewsItem) -> Unit) {
+    val layoutDirection = LocalLayoutDirection.current
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick(news) },
-        colors = CardDefaults.cardColors(containerColor = Color.White) // Set background to white
-
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Row(
             modifier = Modifier.padding(4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween, // Ensures spacing
-            verticalAlignment = Alignment.CenterVertically // Aligns items properly
+            horizontalArrangement = if (layoutDirection == LayoutDirection.Rtl) Arrangement.End else Arrangement.Start, // Adjust arrangement for RTL
+            verticalAlignment = Alignment.CenterVertically
         ) {
             // Text Column
             Column(
-                modifier = Modifier.weight(1f) // Takes remaining space
+                modifier = Modifier.weight(1f)
             ) {
-                Text(text = news.title, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text(
+                    text = news.title,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = news.shortDescription, // Show only 2 lines
+                    text = news.shortDescription,
                     fontSize = 14.sp,
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
-                ){
+                ) {
                     Icon(
                         imageVector = Icons.Default.DateRange,
-                        contentDescription = "Date",
-                        modifier = Modifier.size(12.dp)
-
-
+                        contentDescription = stringResource(R.string.date), // Use localized string
+                        modifier = Modifier.size(12.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = news.date,
                         fontSize = 12.sp,
-                        )
-
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Icon(
                         imageVector = Icons.Default.ThumbUp,
-                        contentDescription = "Like",
-                        modifier = Modifier.size(12.dp)
+                        contentDescription = stringResource(R.string.likes), // Use localized string
+                        modifier = Modifier.size(12.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text= news.like,
-                        fontSize = 12.sp
+                        text = news.like,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-
             }
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -433,18 +516,30 @@ fun NewsRow(news: NewsItem, onClick: (NewsItem) -> Unit) {
                 model = news.imageUrl,
                 contentDescription = "News Image",
                 modifier = Modifier
-                    .size(100.dp) // Adjust image size
+                    .size(100.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .background(Color.LightGray), // Placeholder background
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentScale = ContentScale.Crop
             )
         }
     }
 }
 
+@Composable
+fun LanguageToggle(currentLanguage: MutableState<String>) {
+    val context = LocalContext.current
+    val resources = context.resources
+    val configuration = Configuration(resources.configuration)
 
-
-
+    Button(onClick = {
+        currentLanguage.value = if (currentLanguage.value == "en") "ar" else "en"
+        configuration.setLocale(Locale(currentLanguage.value))
+        context.createConfigurationContext(configuration)
+        resources.updateConfiguration(configuration, resources.displayMetrics)
+    }) {
+        Text(text = if (currentLanguage.value == "en") "عربي" else "English")
+    }
+}
 data class NewsItem(
     val title: String,
     val date: String,

@@ -1,4 +1,12 @@
 <resources>
-    <string name="app_name">W4_Assignment_News</string>
-    <string name="title_activity_news_detail">NewsDetailActivity</string>
+    <string name="app_name">News App</string>
+    <string name="home">Home</string>
+    <string name="category">Category</string>
+    <string name="video">Video</string>
+    <string name="favorite">Favorite</string>
+    <string name="breaking_news">Breaking News: Major Event Happening Now!</string>
+    <string name="date">Date</string>
+    <string name="likes">Likes</string>
+    <string name="share">Share</string>
+    <string name="description">Description</string>
 </resources>

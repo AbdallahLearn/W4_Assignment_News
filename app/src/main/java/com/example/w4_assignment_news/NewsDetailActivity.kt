@@ -4,7 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -39,25 +41,40 @@ class DetailsActivity : ComponentActivity() {
 
         val title = intent.getStringExtra("title") ?: ""
         val date = intent.getStringExtra("date") ?: ""
-        val likeCount = intent.getStringExtra("like_count") ?: "0" // Default to "0" if null
+        val likeCount = intent.getStringExtra("like_count") ?: "0"
         val description = intent.getStringExtra("description") ?: ""
         val imageUrl = intent.getStringExtra("imageUrl") ?: ""
+        val isDarkTheme = intent.getBooleanExtra("isDarkTheme", false) // Retrieve the theme state
 
         setContent {
-            NewsDetailsScreen(
-                title = title,
-                date = date,
-                likeCount = likeCount,
-                description = description,
-                imageUrl = imageUrl,
-                onBackClick = { finish() } // Closes this activity and goes back
-            )
+            // Apply the theme based on the retrieved state
+            MaterialTheme(
+                colorScheme = if (isDarkTheme) DarkColorScheme else LightColorScheme,
+                typography = AppTypography
+            ) {
+                NewsDetailsScreen(
+                    title = title,
+                    date = date,
+                    likeCount = likeCount,
+                    description = description,
+                    imageUrl = imageUrl,
+                    onBackClick = { finish() }
+                )
+            }
         }
     }
 }
 
+
 @Composable
-fun NewsDetailsScreen(title: String, date:String, likeCount:String ,description: String, imageUrl: String, onBackClick: () -> Unit) {
+fun NewsDetailsScreen(
+    title: String,
+    date: String,
+    likeCount: String,
+    description: String,
+    imageUrl: String,
+    onBackClick: () -> Unit
+) {
     var isFavorite by remember { mutableStateOf(false) }
 
     val firstTwoWords = title.split(" ").take(3).joinToString(" ")
@@ -65,52 +82,59 @@ fun NewsDetailsScreen(title: String, date:String, likeCount:String ,description:
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background) // Use background color from the theme
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()) // Enables scrolling
+            .verticalScroll(rememberScrollState())
     ) {
+        // Top Bar with Back Button and Title
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-
-                ){
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier
                         .size(32.dp)
-                        .clickable { onBackClick() }, // Handle back navigation
-                    tint = Color.Black
+                        .clickable { onBackClick() },
+                    tint = MaterialTheme.colorScheme.onSurface // Use onSurface color for icons
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = firstTwoWords, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-
+                Text(
+                    text = firstTwoWords,
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface // Use onSurface color for text
+                )
             }
-          Row(){
-              Icon(
-                  imageVector = Icons.Default.Create,
-                  contentDescription = "Create",
-                  modifier = Modifier.size(30.dp)
-              )
 
+            // Favorite and Create Icons
+            Row {
+                Icon(
+                    imageVector = Icons.Default.Create,
+                    contentDescription = "Create",
+                    modifier = Modifier.size(30.dp),
+                    tint = MaterialTheme.colorScheme.onSurface // Use onSurface color for icons
+                )
                 Spacer(modifier = Modifier.width(10.dp))
-              Icon(
-                  imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder, //I did not find BookMark! so I used Favorite
-                  contentDescription = "Favorite",
-                  modifier = Modifier
-                      .size(30.dp)
-                      .clickable { isFavorite = !isFavorite },
-                  tint = if (isFavorite) Color.Red else Color.Gray
-              )
-          }
-
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = "Favorite",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .clickable { isFavorite = !isFavorite },
+                    tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for icons
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        // News Image
         Image(
             painter = rememberAsyncImagePainter(imageUrl),
             contentDescription = title,
@@ -119,14 +143,20 @@ fun NewsDetailsScreen(title: String, date:String, likeCount:String ,description:
                 .height(250.dp),
             contentScale = ContentScale.Crop
         )
+
         Spacer(modifier = Modifier.height(8.dp))
+
+        // News Title
         Text(
             text = title,
             fontSize = 20.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface // Use onSurface color for text
+        )
 
-            )
         Spacer(modifier = Modifier.height(10.dp))
+
+        // Date and Likes Section
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -137,50 +167,55 @@ fun NewsDetailsScreen(title: String, date:String, likeCount:String ,description:
                 Icon(
                     imageVector = Icons.Default.DateRange,
                     contentDescription = "Date",
-                    modifier = Modifier.size(14.dp) // Slightly larger for visibility
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for icons
                 )
-                Spacer(modifier = Modifier.width(4.dp)) // Adds spacing between icon and text
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = date,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for text
                 )
             }
 
-            // Likes Section
+            // Likes and Share Section
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.ThumbUp,
                     contentDescription = "Like",
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for icons
                 )
-                Spacer(modifier = Modifier.width(4.dp)) // Adds spacing between icon and text
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
                     text = likeCount,
-                    fontSize = 12.sp
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for text
                 )
                 Spacer(modifier = Modifier.width(10.dp))
                 Icon(
                     imageVector = Icons.Default.Share,
-                    contentDescription = "Like",
-                    modifier = Modifier.size(14.dp)
+                    contentDescription = "Share",
+                    modifier = Modifier.size(14.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for icons
                 )
-                Spacer(modifier = Modifier.width(4.dp)) // Adds spacing between icon and text
+                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = max(0, (likeCount.toInt() - 19)).toString() ,//Share count from me (: //I did not find comments icon so I make it share icon
-                    fontSize = 12.sp
+                    text = max(0, (likeCount.toInt() - 19)).toString(),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant // Use onSurfaceVariant for text
                 )
             }
-
         }
+
         Spacer(modifier = Modifier.height(12.dp))
-        Column {
-            Text(
-                text = description,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Justify
 
-            )
-        }
-
+        // News Description
+        Text(
+            text = description,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Justify,
+            color = MaterialTheme.colorScheme.onSurface // Use onSurface color for text
+        )
     }
 }
